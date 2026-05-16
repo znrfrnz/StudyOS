@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f3eb;
+  --foreground: #17130f;
+  --muted: #e9e0d2;
+  --muted-foreground: #756b5f;
+  --card: #fffaf1;
+  --card-foreground: #17130f;
+  --border: #ded2c0;
+  --primary: #17130f;
+  --primary-foreground: #fffaf1;
+  --accent: #dbeafe;
+  --accent-foreground: #172554;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --font-sans: var(--font-geist-sans);
+}
+
+* {
+  @apply box-border;
+}
+
+body {
+  @apply min-h-screen bg-background text-foreground antialiased;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@layer components {
+  .page-shell {
+    @apply min-h-screen px-6 py-8 sm:px-10 lg:px-16;
+  }
+
+  .content-shell {
+    @apply mx-auto max-w-6xl;
+  }
+
+  .hero-panel {
+    @apply mx-auto flex max-w-6xl flex-col justify-between rounded-[2rem] border border-border bg-card p-6 shadow-sm sm:p-10 lg:p-14;
+    min-height: calc(100vh - 4rem);
+  }
+
+  .top-nav {
+    @apply flex items-center justify-between gap-4;
+  }
+
+  .brand-link {
+    @apply text-lg font-semibold tracking-tight;
+  }
+
+  .hero-grid {
+    @apply grid gap-12 py-16 lg:items-end;
+    grid-template-columns: 1fr;
+  }
+
+  .hero-copy-block {
+    @apply max-w-3xl;
+  }
+
+  .eyebrow {
+    @apply mb-5 text-sm font-medium uppercase text-muted-foreground;
+    letter-spacing: 0.24em;
+  }
+
+  .hero-title {
+    @apply text-5xl font-semibold sm:text-7xl lg:text-8xl;
+    letter-spacing: -0.05em;
+  }
+
+  .hero-copy {
+    @apply mt-8 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl;
+  }
+
+  .pillar-list {
+    @apply grid gap-3;
+  }
+
+  .pillar-card {
+    @apply flex items-center gap-4 rounded-2xl border border-border bg-background p-4;
+  }
+
+  .pillar-index {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground;
+  }
+
+  .pillar-label {
+    @apply font-medium;
+  }
+
+  .hero-footer {
+    @apply grid gap-4 border-t border-border pt-6 text-sm text-muted-foreground sm:grid-cols-3;
+  }
+
+  .inline-code {
+    @apply text-foreground;
+  }
+
+  .page-header {
+    @apply mb-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-end;
+  }
+
+  .page-title {
+    @apply text-4xl font-semibold sm:text-6xl;
+    letter-spacing: -0.04em;
+  }
+
+  .header-copy {
+    @apply max-w-sm text-sm leading-6 text-muted-foreground;
+  }
+
+  .dashboard-grid {
+    @apply grid gap-4;
+  }
+
+  .surface-card {
+    @apply rounded-[2rem] border border-border bg-card p-6 shadow-sm;
+  }
+
+  .stack-sm {
+    @apply grid gap-3;
+  }
+
+  .stack-md {
+    @apply grid gap-4;
+  }
+
+  .session-card {
+    @apply rounded-2xl border border-border bg-background p-4;
+  }
+
+  .kicker {
+    @apply text-sm font-medium text-muted-foreground;
+  }
+
+  .section-title {
+    @apply mb-5 text-xl font-semibold;
+  }
+
+  .card-title {
+    @apply mt-3 text-2xl font-semibold;
+  }
+
+  .session-title {
+    @apply mt-2 text-lg font-semibold;
+  }
+
+  .muted-copy {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .card-meta {
+    @apply mt-2 text-sm text-muted-foreground;
+  }
+
+  .session-detail {
+    @apply mt-1 text-sm text-muted-foreground;
+  }
+
+  .btn {
+    @apply inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-medium transition-colors;
+  }
+
+  .btn:disabled {
+    @apply pointer-events-none opacity-50;
+  }
+
+  .btn-default {
+    @apply bg-primary text-primary-foreground hover:opacity-90;
+  }
+
+  .btn-secondary {
+    @apply border border-border bg-background text-foreground hover:bg-muted;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+}
