@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { Clock, Calendar, CheckCircle2, XCircle, BookOpen, Timer } from "lucide-react";
 
-import {
-  getTodaySessions,
-  getUpcomingSessions,
-} from "@/features/sessions/actions";
+import { getSessionsPageData } from "@/features/dashboard/queries";
 import { exportStudyPlanMarkdown, exportStudyPlanIcs } from "@/features/export/actions";
 import { SessionStatusButtons } from "@/features/sessions/components/session-status-buttons";
 import { ExportButton } from "@/features/export/components/export-button";
@@ -49,7 +46,7 @@ function SessionCard({
   session,
   showDate = false,
 }: {
-  session: Awaited<ReturnType<typeof getUpcomingSessions>>[0];
+  session: Awaited<ReturnType<typeof getSessionsPageData>>["upcoming"][0];
   showDate?: boolean;
 }) {
   const status = statusConfig[session.status] || statusConfig.planned;
@@ -172,10 +169,7 @@ function SessionCard({
 }
 
 export default async function SessionsPage() {
-  const [today, upcoming] = await Promise.all([
-    getTodaySessions(),
-    getUpcomingSessions(20),
-  ]);
+  const { today, upcoming } = await getSessionsPageData();
 
   return (
     <div className="page-shell">

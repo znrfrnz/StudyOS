@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { Plus, BookOpen, Calendar, Clock, ArrowRight, CalendarDays, FileText } from "lucide-react";
 
-import { getSubjects } from "@/features/subjects/actions";
-import { getTodaySessions } from "@/features/sessions/actions";
-import { getDeadlines } from "@/features/deadlines/actions";
-import { getRecentFiles } from "@/features/files/actions";
+import { getDashboardData } from "@/features/dashboard/queries";
 import { SessionStatusButtons } from "@/features/sessions/components/session-status-buttons";
 import { SubjectIcon } from "@/features/subjects/components/subject-icons";
 
@@ -16,12 +13,7 @@ function formatTime(date: Date) {
 }
 
 export default async function DashboardPage() {
-  const [subjects, todaySessions, deadlines, recentFiles] = await Promise.all([
-    getSubjects(),
-    getTodaySessions(),
-    getDeadlines(),
-    getRecentFiles(),
-  ]);
+  const { subjects, todaySessions, deadlines, recentFiles } = await getDashboardData();
 
   return (
     <div className="page-shell">

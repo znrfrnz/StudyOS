@@ -4,11 +4,10 @@ import { Calendar, Plus } from "lucide-react";
 
 import {
   createDeadlineFromDeadlines,
-  getDeadlines,
 } from "@/features/deadlines/actions";
+import { getDeadlinesPageData } from "@/features/dashboard/queries";
 import { DeadlineCalendar } from "@/features/deadlines/components/deadline-calendar";
 import { DeleteDeadlineButton } from "@/features/deadlines/components/delete-deadline-button";
-import { getSubjects } from "@/features/subjects/actions";
 
 export const metadata: Metadata = {
   title: "Deadlines",
@@ -50,7 +49,7 @@ export default async function DeadlinesPage({
   searchParams?: Promise<{ error?: string }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const [deadlines, subjects] = await Promise.all([getDeadlines(), getSubjects()]);
+  const { deadlines, subjects } = await getDeadlinesPageData();
   const errorMessage = resolvedSearchParams.error
     ? errorMessages[resolvedSearchParams.error]
     : null;

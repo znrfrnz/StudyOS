@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Calendar, Clock, BookOpen, CheckCircle2, Plus } from "lucide-react";
 
-import { getSubjects } from "@/features/subjects/actions";
-import { getDeadlines } from "@/features/deadlines/actions";
-import { getAvailabilityBlocks } from "@/features/availability/actions";
 import { createSubjectFromPlan } from "@/features/subjects/actions";
 import { createDeadlineFromPlan } from "@/features/deadlines/actions";
 import { createAvailabilityBlockFromPlan } from "@/features/availability/actions";
+import { getPlanPageData } from "@/features/dashboard/queries";
 import { GeneratePlanButton } from "@/features/sessions/components/generate-plan-button";
 import { ExportButton } from "@/features/export/components/export-button";
 import { exportStudyPlanMarkdown, exportStudyPlanIcs } from "@/features/export/actions";
@@ -44,11 +42,7 @@ export default async function PlanPage({
   searchParams?: Promise<{ error?: string }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const [subjects, deadlines, blocks] = await Promise.all([
-    getSubjects(),
-    getDeadlines(),
-    getAvailabilityBlocks(),
-  ]);
+  const { subjects, deadlines, blocks } = await getPlanPageData();
 
   const readyToGenerate = subjects.length > 0 && deadlines.length > 0 && blocks.length > 0;
   const errorMessage = resolvedSearchParams.error

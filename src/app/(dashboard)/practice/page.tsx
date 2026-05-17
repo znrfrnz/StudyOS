@@ -2,18 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BookOpen, HelpCircle, Layers, Plus, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 
-import { getReadyFilesForPractice } from "@/features/files/actions";
 import {
   deleteFlashcard,
-  getFlashcards,
   updateFlashcardMastery,
 } from "@/features/flashcards/actions";
+import { getPracticePageData } from "@/features/dashboard/queries";
 import {
   PracticeFilePicker,
   StartPracticeButton,
 } from "@/features/practice/components/practice-file-picker";
-import { getQuizzes } from "@/features/quizzes/actions";
-import { getSubjects } from "@/features/subjects/actions";
 import { SubjectIcon } from "@/features/subjects/components/subject-icons";
 
 export const metadata: Metadata = {
@@ -25,7 +22,7 @@ const masteryLabels = ["New", "Learning", "Familiar", "Proficient", "Mastered", 
 function PracticeFlashcardItem({
   card,
 }: {
-  card: Awaited<ReturnType<typeof getFlashcards>>[0];
+  card: Awaited<ReturnType<typeof getPracticePageData>>["flashcards"][0];
 }) {
   async function handleMastery(formData: FormData) {
     "use server";
@@ -91,12 +88,7 @@ export default async function PracticePage({
   searchParams?: Promise<{ subjectId?: string; quizId?: string }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const [subjects, files, quizzes, flashcards] = await Promise.all([
-    getSubjects(),
-    getReadyFilesForPractice(),
-    getQuizzes(),
-    getFlashcards(),
-  ]);
+  const { subjects, files, quizzes, flashcards } = await getPracticePageData();
 
   const selectedSubject = subjects.find(
     (subject) => subject.id === resolvedSearchParams.subjectId,
