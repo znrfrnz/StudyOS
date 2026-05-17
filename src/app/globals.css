@@ -38,9 +38,16 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :where(a, button, input, select, textarea):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
 }
 
 @layer components {
@@ -72,11 +79,6 @@ a {
 
   .hero-copy-block {
     @apply max-w-3xl;
-  }
-
-  .eyebrow {
-    @apply mb-5 text-sm font-medium uppercase text-muted-foreground;
-    letter-spacing: 0.24em;
   }
 
   .hero-title {
@@ -145,10 +147,6 @@ a {
     @apply rounded-2xl border border-border bg-background p-4;
   }
 
-  .kicker {
-    @apply text-sm font-medium text-muted-foreground;
-  }
-
   .section-title {
     @apply mb-5 text-xl font-semibold;
   }
@@ -182,11 +180,22 @@ a {
   }
 
   .btn-default {
-    @apply bg-primary text-primary-foreground hover:opacity-90;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .btn-default:hover {
+    opacity: 0.9;
   }
 
   .btn-secondary {
-    @apply border border-border bg-background text-foreground hover:bg-muted;
+    background-color: var(--background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--muted);
   }
 }
 

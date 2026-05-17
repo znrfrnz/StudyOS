@@ -10,20 +10,31 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^6.0.0",
     "@radix-ui/react-slot": "latest",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "class-variance-authority": "latest",
     "clsx": "latest",
+    "dotenv": "^17.4.2",
     "lucide-react": "latest",
     "next": "latest",
+    "openai": "^6.38.0",
+    "pdf-parse": "1.1.1",
+    "prisma": "^6.0.0",
     "react": "latest",
     "react-dom": "latest",
-    "tailwind-merge": "latest"
+    "tailwind-merge": "latest",
+    "uuid": "^14.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
     "@types/node": "latest",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/uuid": "^11.0.0",
     "postcss": "8.5.14",
     "tailwindcss": "latest",
     "typescript": "latest"

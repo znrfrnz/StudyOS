@@ -10,18 +10,21 @@ file_chunks
 file_ai_metadata
 deadlines
 availability_blocks
-study_plans
 study_sessions
+quizzes
+quiz_questions
+quiz_attempts
+weak_topic_signals
+flashcards
 ```
 
 ## Post-MVP Tables
 
 ```md
 tasks
-quizzes
-quiz_questions
-quiz_attempts
-flashcards
+quiz_attempt_details
+calendar_integrations
+notifications
 ```
 
 ## Key Relationships
@@ -32,11 +35,11 @@ flashcards
 - A file has one AI metadata record.
 - A subject has many deadlines.
 - A user has many availability blocks.
-- A study plan belongs to a user and can target one or more deadlines.
-- A study plan has many study sessions.
 - A study session can link to a subject, file, or topic.
 - A quiz belongs to a file or topic when quiz generation is added.
 - A quiz attempt belongs to a quiz and user when quiz attempts are added.
+- Weak topic signals belong to a user and can link back to a subject and file.
+- Flashcards belong to a user and subject, and may link back to a file.
 
 ## Important Fields
 
@@ -53,7 +56,7 @@ flashcards
 - `name`
 - `color`
 - `priority`
-- `archived_at`
+- `archived`
 - `created_at`
 
 ### files
@@ -106,19 +109,10 @@ flashcards
 - `end_time`
 - `max_session_minutes`
 
-### study_plans
-
-- `id`
-- `user_id`
-- `title`
-- `status`
-- `created_at`
-- `updated_at`
-
 ### study_sessions
 
 - `id`
-- `study_plan_id`
+- `user_id`
 - `subject_id`
 - `file_id`
 - `topic`
@@ -129,6 +123,58 @@ flashcards
 - `status`
 - `goal`
 - `reason`
+
+### quizzes
+
+- `id`
+- `user_id`
+- `subject_id`
+- `file_id`
+- `title`
+- `status`
+- `created_at`
+
+### quiz_questions
+
+- `id`
+- `quiz_id`
+- `question`
+- `options`
+- `correct_answer`
+- `explanation`
+- `source_excerpt`
+- `topic`
+
+### quiz_attempts
+
+- `id`
+- `quiz_id`
+- `user_id`
+- `score`
+- `answers`
+- `created_at`
+
+### weak_topic_signals
+
+- `id`
+- `user_id`
+- `subject_id`
+- `file_id`
+- `topic`
+- `incorrect_count`
+- `total_attempts`
+- `last_encountered_at`
+
+### flashcards
+
+- `id`
+- `user_id`
+- `subject_id`
+- `file_id`
+- `front`
+- `back`
+- `mastery_level`
+- `last_reviewed_at`
 
 ## Status Values
 
@@ -147,8 +193,7 @@ Study session status:
 - `missed`
 - `skipped`
 
-Study plan status:
+Quiz status:
 
-- `active`
-- `completed`
+- `ready`
 - `archived`

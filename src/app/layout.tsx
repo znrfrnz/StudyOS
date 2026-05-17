@@ -9,8 +9,35 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "StudyOS",
-  description: "AI-powered study operating system for turning materials into realistic study plans.",
+  applicationName: "StudyOS",
+  title: {
+    default: "StudyOS",
+    template: "%s | StudyOS",
+  },
+  description: "Turn study materials, deadlines, and availability into a realistic study plan students can follow.",
+  keywords: [
+    "study planner",
+    "student productivity",
+    "study schedule",
+    "PDF study tool",
+    "exam planner",
+  ],
+  openGraph: {
+    title: "StudyOS",
+    description: "Turn study materials, deadlines, and availability into a realistic study plan students can follow.",
+    siteName: "StudyOS",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "StudyOS",
+    description: "Turn study materials, deadlines, and availability into a realistic study plan students can follow.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

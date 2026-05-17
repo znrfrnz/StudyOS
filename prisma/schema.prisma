@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  subjects             Subject[]
+  files                File[]
+  deadlines            Deadline[]
+  availabilityBlocks   AvailabilityBlock[]
+  studySessions        StudySession[]
+  quizzes              Quiz[]
+  quizAttempts         QuizAttempt[]
+  weakTopicSignals     WeakTopicSignal[]
+  flashcards           Flashcard[]
+
+  @@map("users")
+}
+
+model Subject {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  color     String?
+  icon      String?
+  priority  Int      @default(0)
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files         File[]
+  deadlines     Deadline[]
+  studySessions StudySession[]
+  quizzes       Quiz[]
+  flashcards    Flashcard[]
+  weakSignals   WeakTopicSignal[]
+
+  @@index([userId])
+  @@map("subjects")
+}
+
+model File {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  subjectId         String   @map("subject_id")
+  name              String
+  storagePath       String   @map("storage_path")
+  mimeType          String   @map("mime_type")
+  sizeBytes         Int      @map("size_bytes")
+  processingStatus  String   @default("pending") @map("processing_status")
+  uploadedAt        DateTime @default(now()) @map("uploaded_at")
+  lastReviewedAt    DateTime? @map("last_reviewed_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  chunks  FileChunk[]
+  aiMeta  FileAiMetadata?
+  sessions StudySession[]
+  quizzes  Quiz[]
+  flashcards Flashcard[]
+  weakSignals WeakTopicSignal[]
+
+  @@index([userId])
+  @@index([subjectId])
+  @@map("files")
+}
+
+model FileChunk {
+  id          String  @id @default(uuid())
+  fileId      String  @map("file_id")
+  chunkIndex  Int     @map("chunk_index")
+  content     String
+  pageNumber  Int?    @map("page_number")
+
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@map("file_chunks")
+}
+
+model FileAiMetadata {
+  id               String   @id @default(uuid())
+  fileId           String   @unique @map("file_id")
+  summary          String?
+  topics           String[]
+  difficultyScore  Int?     @map("difficulty_score")
+  estimatedMinutes Int?     @map("estimated_minutes")
+  generatedAt      DateTime @default(now()) @map("generated_at")
+
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@map("file_ai_metadata")
+}
+
+model Deadline {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  subjectId String   @map("subject_id")
+  title     String
+  dueAt     DateTime @map("due_at")
+  priority  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([subjectId])
+  @@map("deadlines")
+}
+
+model AvailabilityBlock {
+  id                String @id @default(uuid())
+  userId            String @map("user_id")
+  dayOfWeek         Int    @map("day_of_week") // 0 = Sunday, 6 = Saturday
+  startTime         String @map("start_time")  // "HH:MM" 24-hour format
+  endTime           String @map("end_time")    // "HH:MM" 24-hour format
+  maxSessionMinutes Int    @default(90) @map("max_session_minutes")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("availability_blocks")
+}
+
+model StudySession {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  subjectId       String   @map("subject_id")
+  fileId          String?  @map("file_id")
+  topic           String?
+  startsAt        DateTime @map("starts_at")
+  endsAt          DateTime @map("ends_at")
+  durationMinutes Int      @map("duration_minutes")
+  sessionType     String   @map("session_type") // learn, review, practice
+  status          String   @default("planned") @map("status") // planned, completed, missed, skipped
+  goal            String?
+  reason          String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  file    File?   @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([subjectId])
+  @@index([startsAt])
+  @@map("study_sessions")
+}
+
+model Quiz {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  subjectId String   @map("subject_id")
+  fileId    String   @map("file_id")
+  title     String
+  status    String   @default("ready") @map("status") // ready, archived
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject  Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  file     File          @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@index([userId])
+  @@index([subjectId])
+  @@index([fileId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id            String   @id @default(uuid())
+  quizId        String   @map("quiz_id")
+  question      String
+  options       String[]
+  correctAnswer String   @map("correct_answer")
+  explanation   String
+  sourceExcerpt String?  @map("source_excerpt")
+  topic         String   // Used for weak-topic tracking
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id        String   @id @default(uuid())
+  quizId    String   @map("quiz_id")
+  userId    String   @map("user_id")
+  score     Int      // Number of correct answers
+  answers   Json     // { questionId: selectedOption }
+  createdAt DateTime @default(now()) @map("created_at")
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+  @@index([userId])
+  @@map("quiz_attempts")
+}
+
+model WeakTopicSignal {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  subjectId       String   @map("subject_id")
+  fileId          String?  @map("file_id")
+  topic           String
+  incorrectCount  Int      @default(0) @map("incorrect_count")
+  totalAttempts   Int      @default(0) @map("total_attempts")
+  lastEncounteredAt DateTime @default(now()) @map("last_encountered_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  file    File?   @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, topic])
+  @@index([userId])
+  @@index([subjectId])
+  @@map("weak_topic_signals")
+}
+
+model Flashcard {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  subjectId       String   @map("subject_id")
+  fileId          String?  @map("file_id")
+  front           String
+  back            String
+  masteryLevel    Int      @default(0) @map("mastery_level") // 0-5
+  lastReviewedAt  DateTime? @map("last_reviewed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  file    File?   @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([subjectId])
+  @@map("flashcards")
+}
