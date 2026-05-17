@@ -142,7 +142,7 @@ bun install
 
 # Set up environment
 cp .env.example .env
-# Add DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY, OPENAI_API_KEY
+# Add DATABASE_URL, DIRECT_URL, Supabase keys, and Azure OpenAI keys
 
 # Generate Prisma client
 bunx prisma generate
@@ -156,6 +156,17 @@ bun run typecheck
 # Build for production
 bun run build
 ```
+
+### Vercel + Supabase
+
+For Vercel, set `DATABASE_URL` to Supabase's pooled connection string, not the direct `db.<project>.supabase.co:5432` URL. Vercel serverless functions should connect through the pooler:
+
+```bash
+DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-region.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
+```
+
+Use `DIRECT_URL` only for Prisma migrations or other direct database tasks.
 
 ## License
 
