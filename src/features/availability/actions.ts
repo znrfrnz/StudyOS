@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { requireUser } from "@/lib/auth/user";
 import { prisma } from "@/lib/db/prisma";
-import { createClient } from "@/lib/supabase/server";
 
 const availabilitySchema = z.object({
   dayOfWeek: z.coerce.number().int().min(0).max(6),
@@ -14,17 +14,8 @@ const availabilitySchema = z.object({
   maxSessionMinutes: z.coerce.number().int().min(15).max(480).optional(),
 });
 
-async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
 export async function getAvailabilityBlocks() {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.availabilityBlock.findMany({
     where: { userId: user.id },
@@ -33,7 +24,7 @@ export async function getAvailabilityBlocks() {
 }
 
 export async function createAvailabilityBlock(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = availabilitySchema.safeParse({
     dayOfWeek: formData.get("dayOfWeek"),
@@ -68,7 +59,7 @@ export async function createAvailabilityBlock(formData: FormData) {
 }
 
 export async function createAvailabilityBlockFromPlan(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = availabilitySchema.safeParse({
     dayOfWeek: formData.get("dayOfWeek"),
@@ -104,7 +95,7 @@ export async function createAvailabilityBlockFromPlan(formData: FormData) {
 }
 
 export async function deleteAvailabilityBlock(id: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const existing = await prisma.availabilityBlock.findFirst({
     where: { id, userId: user.id },

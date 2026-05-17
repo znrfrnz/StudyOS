@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { requireUser } from "@/lib/auth/user";
 import { prisma } from "@/lib/db/prisma";
-import { createClient } from "@/lib/supabase/server";
 
 const deadlineSchema = z.object({
   subjectId: z.string().min(1),
@@ -14,17 +14,8 @@ const deadlineSchema = z.object({
   priority: z.coerce.number().int().min(0).max(10).optional(),
 });
 
-async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
 export async function getDeadlines() {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.deadline.findMany({
     where: { userId: user.id },
@@ -34,7 +25,7 @@ export async function getDeadlines() {
 }
 
 export async function getDeadlinesBySubject(subjectId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.deadline.findMany({
     where: { subjectId, userId: user.id },
@@ -44,7 +35,7 @@ export async function getDeadlinesBySubject(subjectId: string) {
 }
 
 export async function createDeadline(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = deadlineSchema.safeParse({
     subjectId: formData.get("subjectId"),
@@ -86,7 +77,7 @@ export async function createDeadline(formData: FormData) {
 }
 
 export async function createDeadlineFromPlan(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = deadlineSchema.safeParse({
     subjectId: formData.get("subjectId"),
@@ -129,7 +120,7 @@ export async function createDeadlineFromPlan(formData: FormData) {
 }
 
 export async function createDeadlineFromDeadlines(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = deadlineSchema.safeParse({
     subjectId: formData.get("subjectId"),
@@ -172,7 +163,7 @@ export async function createDeadlineFromDeadlines(formData: FormData) {
 }
 
 export async function deleteDeadline(id: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const existing = await prisma.deadline.findFirst({
     where: { id, userId: user.id },

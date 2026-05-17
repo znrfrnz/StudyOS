@@ -159,14 +159,14 @@ bun run build
 
 ### Vercel + Supabase
 
-For Vercel, set `DATABASE_URL` to Supabase's pooled connection string, not the direct `db.<project>.supabase.co:5432` URL. Vercel serverless functions should connect through the pooler:
+For Vercel, set `DATABASE_URL` to Supabase's transaction pooler string, not the direct `db.<project>.supabase.co:5432` URL. Vercel serverless functions should connect through the pooler, and Prisma needs `pgbouncer=true` to avoid prepared statement errors like `prepared statement "s3" already exists`.
 
 ```bash
-DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-region.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
-DIRECT_URL="postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres.PROJECT_REF:URL_ENCODED_PASSWORD@aws-0-region.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require"
+DIRECT_URL="postgresql://postgres.PROJECT_REF:URL_ENCODED_PASSWORD@aws-0-region.pooler.supabase.com:5432/postgres?sslmode=require"
 ```
 
-Use `DIRECT_URL` only for Prisma migrations or other direct database tasks.
+Use `DIRECT_URL` only for Prisma migrations or other direct database tasks. If your database password contains special characters such as `@`, `#`, `?`, or `:`, URL-encode it before pasting it into Vercel.
 
 ## License
 

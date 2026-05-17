@@ -2,24 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 
+import { requireUser } from "@/lib/auth/user";
 import { prisma } from "@/lib/db/prisma";
-import { createClient } from "@/lib/supabase/server";
 import {
   generateSchedule,
   type ScheduleInput,
 } from "@/lib/planner/engine";
 
-async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
 export async function getTodaySessions() {
-  const user = await getUser();
+  const user = await requireUser();
 
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
@@ -38,7 +29,7 @@ export async function getTodaySessions() {
 }
 
 export async function getWeekSessions() {
-  const user = await getUser();
+  const user = await requireUser();
   const now = new Date();
   const startOfWeek = new Date(now);
   startOfWeek.setDate(now.getDate() - now.getDay());
@@ -57,7 +48,7 @@ export async function getWeekSessions() {
 }
 
 export async function getUpcomingSessions(limit = 20) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const now = new Date();
 
@@ -74,7 +65,7 @@ export async function getUpcomingSessions(limit = 20) {
 }
 
 export async function getSessionsBySubject(subjectId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.studySession.findMany({
     where: { subjectId, userId: user.id },
@@ -87,7 +78,7 @@ export async function updateSessionStatus(
   sessionId: string,
   status: "completed" | "missed" | "skipped",
 ) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const session = await prisma.studySession.findFirst({
     where: { id: sessionId, userId: user.id },
@@ -113,7 +104,7 @@ export async function updateSessionStatus(
 }
 
 export async function generateStudyPlan(subjectId?: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   // Fetch inputs
   const [subjects, deadlines, blocks, files, weakTopics] = await Promise.all([
@@ -216,7 +207,7 @@ export async function generateStudyPlan(subjectId?: string) {
 }
 
 export async function rescheduleMissedSessions() {
-  const user = await getUser();
+  const user = await requireUser();
 
   const missed = await prisma.studySession.findMany({
     where: {

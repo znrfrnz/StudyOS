@@ -2,21 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
+import { requireUser } from "@/lib/auth/user";
 import { prisma } from "@/lib/db/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { generateQuizQuestions } from "@/lib/ai/openai";
 
-async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
 export async function getQuizzes() {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.quiz.findMany({
     where: { userId: user.id },
@@ -31,7 +22,7 @@ export async function getQuizzes() {
 }
 
 export async function getQuizzesBySubject(subjectId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.quiz.findMany({
     where: { subjectId, userId: user.id },
@@ -46,7 +37,7 @@ export async function getQuizzesBySubject(subjectId: string) {
 }
 
 export async function getQuiz(quizId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.quiz.findFirst({
     where: { id: quizId, userId: user.id },
@@ -62,7 +53,7 @@ export async function generateQuiz(
   fileId: string,
   options: { fresh?: boolean; titlePrefix?: string } = {},
 ) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const file = await prisma.file.findFirst({
     where: { id: fileId, userId: user.id },
@@ -179,7 +170,7 @@ export async function submitQuizAttempt(
   quizId: string,
   answers: Record<string, string>,
 ) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const quiz = await prisma.quiz.findFirst({
     where: { id: quizId, userId: user.id },
@@ -287,7 +278,7 @@ export async function submitQuizAttempt(
 }
 
 export async function deleteQuiz(quizId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const quiz = await prisma.quiz.findFirst({
     where: { id: quizId, userId: user.id },
@@ -308,7 +299,7 @@ export async function deleteQuiz(quizId: string) {
 }
 
 export async function getWeakTopicSignals() {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.weakTopicSignal.findMany({
     where: { userId: user.id },

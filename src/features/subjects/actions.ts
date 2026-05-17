@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { requireUser } from "@/lib/auth/user";
 import { prisma } from "@/lib/db/prisma";
-import { createClient } from "@/lib/supabase/server";
 
 const subjectSchema = z.object({
   name: z.string().min(1).max(100),
@@ -14,37 +14,22 @@ const subjectSchema = z.object({
   priority: z.coerce.number().int().min(0).max(10).optional(),
 });
 
-async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
 export async function getSubjects() {
-  const user = await getUser();
-
-  await prisma.user.upsert({
-    where: { id: user.id },
-    update: { email: user.email! },
-    create: { id: user.id, email: user.email! },
-  });
+  const user = await requireUser();
 
   return prisma.subject.findMany({
     where: { userId: user.id, archived: false },
     orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
-      include: {
-        _count: {
-          select: { files: true },
-        },
+    include: {
+      _count: {
+        select: { files: true },
       },
+    },
   });
 }
 
 export async function getSubject(id: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.subject.findFirst({
     where: { id, userId: user.id },
@@ -52,7 +37,7 @@ export async function getSubject(id: string) {
 }
 
 export async function createSubject(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = subjectSchema.safeParse({
     name: formData.get("name"),
@@ -78,7 +63,7 @@ export async function createSubject(formData: FormData) {
 }
 
 export async function createSubjectFromPlan(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = subjectSchema.safeParse({
     name: formData.get("name"),
@@ -105,7 +90,7 @@ export async function createSubjectFromPlan(formData: FormData) {
 }
 
 export async function updateSubject(id: string, formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const parsed = subjectSchema.safeParse({
     name: formData.get("name"),
@@ -138,7 +123,7 @@ export async function updateSubject(id: string, formData: FormData) {
 }
 
 export async function deleteSubject(id: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const existing = await prisma.subject.findFirst({
     where: { id, userId: user.id },

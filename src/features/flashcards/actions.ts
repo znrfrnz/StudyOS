@@ -2,21 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
+import { requireUser } from "@/lib/auth/user";
 import { prisma } from "@/lib/db/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { generateFlashcards } from "@/lib/ai/openai";
 
-async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
 export async function getFlashcards() {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.flashcard.findMany({
     where: { userId: user.id },
@@ -29,7 +20,7 @@ export async function getFlashcards() {
 }
 
 export async function getFlashcardsBySubject(subjectId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.flashcard.findMany({
     where: { subjectId, userId: user.id },
@@ -42,7 +33,7 @@ export async function getFlashcardsBySubject(subjectId: string) {
 }
 
 export async function generateFlashcardsForFile(fileId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const file = await prisma.file.findFirst({
     where: { id: fileId, userId: user.id },
@@ -119,7 +110,7 @@ export async function updateFlashcardMastery(
   flashcardId: string,
   delta: number,
 ) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const card = await prisma.flashcard.findFirst({
     where: { id: flashcardId, userId: user.id },
@@ -146,7 +137,7 @@ export async function updateFlashcardMastery(
 }
 
 export async function deleteFlashcard(flashcardId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const card = await prisma.flashcard.findFirst({
     where: { id: flashcardId, userId: user.id },

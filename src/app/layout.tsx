@@ -3,6 +3,8 @@ import { Geist } from "next/font/google";
 
 import "./globals.css";
 
+export const preferredRegion = "syd1";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

@@ -12,13 +12,24 @@ export async function signIn(formData: FormData) {
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (data.user) {
+    await prisma.user.upsert({
+      where: { id: data.user.id },
+      update: { email: data.user.email! },
+      create: {
+        id: data.user.id,
+        email: data.user.email!,
+      },
+    });
   }
 
   redirect("/dashboard");

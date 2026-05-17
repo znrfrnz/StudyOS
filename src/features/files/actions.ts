@@ -3,23 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
 
+import { requireUser } from "@/lib/auth/user";
 import { prisma } from "@/lib/db/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { uploadFileToStorage, deleteFileFromStorage } from "@/lib/storage/supabase";
 import { extractTextFromPdf } from "@/lib/ai/pdf";
 import { generateFileMetadata, chunkText } from "@/lib/ai/openai";
 
-async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
 export async function uploadAndProcessFile(formData: FormData) {
-  const user = await getUser();
+  const user = await requireUser();
   const subjectId = formData.get("subjectId") as string;
   const file = formData.get("file") as File;
 
@@ -116,7 +107,7 @@ export async function uploadAndProcessFile(formData: FormData) {
 }
 
 export async function getFilesBySubject(subjectId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.file.findMany({
     where: { subjectId, userId: user.id },
@@ -126,7 +117,7 @@ export async function getFilesBySubject(subjectId: string) {
 }
 
 export async function getRecentFiles(limit = 5) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.file.findMany({
     where: { userId: user.id },
@@ -137,7 +128,7 @@ export async function getRecentFiles(limit = 5) {
 }
 
 export async function getReadyFilesForPractice() {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.file.findMany({
     where: {
@@ -150,7 +141,7 @@ export async function getReadyFilesForPractice() {
 }
 
 export async function getFile(fileId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   return prisma.file.findFirst({
     where: { id: fileId, userId: user.id },
@@ -165,7 +156,7 @@ export async function getFile(fileId: string) {
 }
 
 export async function deleteFile(fileId: string) {
-  const user = await getUser();
+  const user = await requireUser();
 
   const file = await prisma.file.findFirst({
     where: { id: fileId, userId: user.id },
