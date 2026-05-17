@@ -25,3 +25,10 @@ pnpm-debug.log*
 *.tsbuildinfo
 
 /src/generated/prisma
+
+# Documentation & planning files
+/PRODUCT.md
+/docs/
+/plan.md
+/AGENTS.md
+/DESIGN.md
